@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/Toxic_Filter.egg-info/PKG-INFO
+src/Toxic_Filter.egg-info/SOURCES.txt
+src/Toxic_Filter.egg-info/dependency_links.txt
+src/Toxic_Filter.egg-info/top_level.txt
