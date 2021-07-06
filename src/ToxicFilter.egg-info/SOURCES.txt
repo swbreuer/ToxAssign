@@ -1,0 +1,14 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+src/ToxicFilter/Merge.py
+src/ToxicFilter/PugRestCaller.py
+src/ToxicFilter/ToxFormat.py
+src/ToxicFilter/UnfoundMatch.py
+src/ToxicFilter/__init__.py
+src/ToxicFilter/filter.py
+src/ToxicFilter.egg-info/PKG-INFO
+src/ToxicFilter.egg-info/SOURCES.txt
+src/ToxicFilter.egg-info/dependency_links.txt
+src/ToxicFilter.egg-info/top_level.txt
