@@ -28,7 +28,7 @@ def foodRecordCheck(record, setSafe, index):
 
 def toxicRecordCheck(record, setToxic):
     print("toxic record check placeholder")
-    setToxic.add(record["Record"]["RecordTitle"])
+    setToxic.add(record["Record"]["RecordTitle"] + " nan")
     return
 
 

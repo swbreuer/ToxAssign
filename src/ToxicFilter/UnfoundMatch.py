@@ -29,5 +29,5 @@ def match(compound, sign):
         for element in setUnfound:
             fSetUnfound.write(element+"\n")
 
-    #os.remove(f"./{compound}/{sign} SetUnfound.txt")
+    os.remove(f"./{compound}/{sign} SetUnfound.txt")
 
