@@ -1,12 +1,12 @@
 Metadata-Version: 2.1
 Name: ToxicFilter
-Version: 0.0.1
-Summary: A toxic filter used
-Home-page: TBD
+Version: 0.0.3
+Summary: A toxic filter used to analyse Mass Spectroscopy output on potentially toxic chemicals
+Home-page: https://github.com/swbreuer/ToxicFilter
 Author: Samuel Breuer
 Author-email: swbreuer@mtu.edu
 License: UNKNOWN
-Project-URL: Bug Tracker, TBD
+Project-URL: Bug Tracker, https://github.com/swbreuer/ToxicFilter/issues
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License
