@@ -1,24 +1,31 @@
+#!/usr/bin/env python
 from requests.exceptions import Timeout
 import requests as req
 import pandas as pd
 import json
 import time
 import os
+import logging
 
-def foodRecordCheck(record, setSafe, index):
+
+def foodrecordcheck(record, safe, index):
     try:
         for j in range(5):
-            if(record["Record"]["Section"][index]["Section"][j]["TOCHeading"]=="FDA Generally Recognized as Safe - GRAS Notices"):
+            # Chemical is generally recognised as safe
+            if record["Record"]["Section"][index]["Section"][j]["TOCHeading"] == \
+                    "FDA Generally Recognized as Safe - GRAS Notices":
                 print("Found! FDA GRAS!")
-                setSafe.add(str(record["Record"]["RecordTitle"]) + ", FDA GRAS")
+                safe.add(str(record["Record"]["RecordTitle"]) + ", FDA GRAS")
                 return True
-            if(record["Record"]["Section"][index]["Section"][j]["TOCHeading"]=="FDA Substances Added to Food"):
+            # Chemical is added to food
+            if record["Record"]["Section"][index]["Section"][j]["TOCHeading"] == "FDA Substances Added to Food":
                 print("Found! FDA food usages!")
-                setSafe.add(record["Record"]["RecordTitle"] + ", FDA food use")
+                safe.add(record["Record"]["RecordTitle"] + ", FDA food use")
                 return True
-            if (record["Record"]["Section"][index]["Section"][j]["TOCHeading"] == "Food Additive Classes"):
+            # chemical is added to food
+            if record["Record"]["Section"][index]["Section"][j]["TOCHeading"] == "Food Additive Classes":
                 print("Found! Food Additive!")
-                setSafe.add(record["Record"]["RecordTitle"] + ", Food Additive")
+                safe.add(record["Record"]["RecordTitle"] + ", Food Additive")
                 return True
 
     except IndexError:
@@ -26,158 +33,156 @@ def foodRecordCheck(record, setSafe, index):
         return True
 
 
-def toxicRecordCheck(record, setToxic):
+def toxicrecordcheck(record, toxic):
     print("toxic record check placeholder")
-    setToxic.add(record["Record"]["RecordTitle"] + " nan")
+    toxic.add(record["Record"]["RecordTitle"] + " nan")
+    # todo no scanning for toxic records
     return
 
 
-def safetyHazardCheck(record, setToxic, index):
+def safetyhazardcheck(record, toxic, index):
     print("safety hazard check |", end=" ")
     try:
         for j in range(5):
-            if record["Record"]["Section"][index]["Section"][0]["Section"][j]["TOCHeading"]\
-                    =="Hazard Classes and Categories" :
+            if record["Record"]["Section"][index]["Section"][0]["Section"][j]["TOCHeading"] \
+                    == "Hazard Classes and Categories":
+                # add hazard classes to file such as acute tox and irritability
                 print("Found! Hazard classes added to file")
-                setToxic.add(record["Record"]["RecordTitle"]+ "\t" +
-                             str(record["Record"]["Section"][index]["Section"][0]["Section"][j]["Information"][0]
-                                 ["Value"]["StringWithMarkup"]))
+                toxic.add(record["Record"]["RecordTitle"] + "\t" +
+                          str(record["Record"]["Section"][index]["Section"][0]["Section"]
+                              [j]["Information"][0]["Value"]["StringWithMarkup"]))
                 return True
-
     except IndexError:
         print("hazard class not found |", end="")
         return False
 
 
-def request(cids, setUnknown, setUnchecked, setTimeout, setToxic, setSafe):
+def request(cids, unknown, unchecked, timeout, toxic, safe):
     ids = cids["IdentifierList"]["CID"]
     for cid in ids:
         try:
             response = req.get(
                 "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{cid}/JSON/".format(
-                    cid=cid))
-            time.sleep(.2)
+                    cid=cid))  # request full record about chemical
+            time.sleep(.2)  # wait to not overflow PubChem
             record = json.loads(response.text)
-            checked = False
+            checked = False  # whether record has been checked to not double count
             try:
                 for i in range(100):
-                    if(checked):
+                    if checked:
                         continue
                     if record["Record"]["Section"][i]["TOCHeading"] == "Toxicity":
-                        toxicRecordCheck(record, setToxic)
+                        toxicrecordcheck(record, toxic)
                     elif record["Record"]["Section"][i]["TOCHeading"] == "Safety and Hazards":
-                        checked = safetyHazardCheck(record, setToxic, i)
-            except Exception:
+                        checked = safetyhazardcheck(record, toxic, i)
+            except Exception as e:
+                logging.exception(e)
                 pass
             for i in range(100):
                 if checked:
                     return
                 if record["Record"]["Section"][i]["TOCHeading"] == "Food Additives and Ingredients":
-                    checked = foodRecordCheck(record, setSafe, i)
+                    checked = foodrecordcheck(record, safe, i)
 
         except Timeout:
             print()
             print("------TIMEOUT-------")
             print(cids)
             print("------------------")
-            setTimeout.add(cid)
+            timeout.add(cid)
             return
-        except IndexError:
+        except IndexError:  # record not classifiable
             print("not checked")
-            setUnchecked.add(record["Record"]["RecordTitle"])
+            unchecked.add(record["Record"]["RecordTitle"])
             return
         except Exception as e:
-            print()
-            print("------" + str(e) + "-------")
-            print(cids)
-            print("------------------")
-            setUnknown.add(cid)
+            logging.exception(e)
+            unknown.add(cid)
             return
 
 
-def processChems(toxNames, setUnknown, setUnchecked, setTimeout, setUnfound, setToxic, setSafe):
-    for value in toxNames:
+def processchems(compounds, unknown, unchecked, timeout, unfound, toxic, safe):
+    for value in compounds:
         try:
-            print("["+str(value)+"]", end=" ")
+            print("[" + str(value) + "]", end=" ")
             response = req.get(
                 "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{compound}/cids/JSON".format(compound=value))
             time.sleep(.2)
             cids = json.loads(response.text)
-            if (response.status_code == 404):
-                setUnfound.add(value)
+            if response.status_code == 404:  # chemical not found in PubChem
+                unfound.add(value)
                 print("404 not found")
             else:
-                request(cids, setUnknown, setUnchecked, setTimeout, setToxic, setSafe)
+                request(cids, unknown, unchecked, timeout, toxic, safe)
 
         except Timeout:
             print()
             print("------TIMEOUT-------")
             print(value)
             print("------------------")
-            setTimeout.add(value[1])
+            timeout.add(value[1])
             return
         except Exception as e:
-            print()
-            print("------" + str(e) + "-------")
-            print(value)
-            print("------------------")
-            setUnknown.add(value[1])
+            logging.exception(e)
+            unknown.add(value[1])
             return
 
 
 def main(compound, sign):
+    tox_names = set()
+    toxic = set()
+    safe = set()
+    unknown = set()
+    unchecked = set()
+    timeout = set()
+    unfound = set()
     esi = pd.read_csv(f'./{sign}ESI {compound}.csv', encoding='unicode_escape')
-    tox = pd.read_csv('./OpenFoodTox.csv', encoding='unicode_escape').dropna(axis=0, subset=['MOLECULARFORMULA','COM_NAME']).drop_duplicates()
-    #esiPos['Formula'] = esiPos['Formula'].str.replace(' ', '')
-    #esiNeg['Formula'] = esiNeg['Formula'].str.replace(' ', '')
-    posToxNames_Form = tox.COM_NAME[tox.MOLECULARFORMULA.isin(esi.formula)]
-    toxNames = set()
-    setToxic = set()
-    setSafe = set()
-    setUnknown = set()
-    setUnchecked = set()
-    setTimeout = set()
-    setUnfound = set()
-    toxNames.update(posToxNames_Form)
+    tox = pd.read_csv('./OpenFoodTox.csv', encoding='unicode_escape')\
+        .dropna(axis=0, subset=['MOLECULARFORMULA', 'COM_NAME']).drop_duplicates()
+    tox_names.update(tox.COM_NAME[tox.MOLECULARFORMULA.isin(esi.formula)])
     try:
-        processChems(toxNames, setUnknown, setUnchecked, setTimeout, setUnfound, setToxic, setSafe)
+        processchems(tox_names, unknown, unchecked, timeout, unfound, toxic, safe)
     finally:
-        if not os.path.exists(f"./{compound}/"):
+        if not os.path.exists(f"./{compound}/"):    # create new directory for chem and move into it
             os.makedirs(f"./{compound}/")
         os.chdir(f"./{compound}/")
-
-        with open(f"{sign} MainOut.txt",'w+') as fOut:
+        # write main out with unknown, timeout, and safe categories
+        with open(f"{sign} MainOut.txt", 'w+') as fOut:
             fOut.write("===================== Unknown =====================\n")
-            for element in setUnknown:
+            for element in unknown:
                 fOut.write(str(element))
                 fOut.write("\n")
             fOut.write("===================== Timeout =====================\n")
-            for element in setTimeout:
+            for element in timeout:
                 fOut.write(str(element))
                 fOut.write("\n")
             fOut.write("====================== Safe =======================\n")
-            for element in setSafe:
+            for element in safe:
                 fOut.write(str(element))
                 fOut.write("\n")
-        with open(f"{sign} SetUnchecked.txt",'w+') as fUnchecked:
-            for element in setUnchecked:
+        # write set unchecked with unchecked records
+        with open(f"{sign} SetUnchecked.txt", 'w+') as fUnchecked:
+            for element in unchecked:
                 fUnchecked.write(str(element))
                 fUnchecked.write("\n")
-        with open(f"{sign} SetUnfound.txt",'w+') as fUnfound:
-            for element in setUnfound:
+        # write set unchecked with unfound records
+        with open(f"{sign} SetUnfound.txt", 'w+') as fUnfound:
+            for element in unfound:
                 fUnfound.write(str(element))
                 fUnfound.write("\n")
+        # write set unchecked with toxic records
         with open(f"{sign} SetToxic.txt", 'w+') as fToxic:
-            for element in setToxic:
+            for element in toxic:
                 fToxic.write(str(element).replace("\'", "\""))
                 fToxic.write("\n")
 
-    print(setTimeout)
+    print(timeout)
     print("\n")
-    print(setUnknown)
+    print(unknown)
     print("\n")
     os.chdir("..")
 
 
-if __name__=="__main__":
-    main("YP","-")
+# debugging purposes
+if __name__ == "__main__":
+    main("YP", "-")

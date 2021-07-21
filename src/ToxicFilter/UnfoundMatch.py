@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import pandas as pd
 import os
 
@@ -7,27 +8,25 @@ def match(compound, sign):
     unfound = pd.read_csv(f"./{compound}/{sign} SetUnfound.txt", delimiter="\t", engine='python', names=["name"])
     found = pd.read_csv("Remove.csv")
 
-    setSafe = pd.DataFrame(columns=["compound", "alias", "safety"])
     unfound.name = unfound.name.astype(str)
     found.compound = found.compound.astype(str)
-    foundComp = unfound.merge(found, right_on="compound", left_on="name", how="inner")
-    setSafe = foundComp
-    setSafe = setSafe[(setSafe.Safety == "safe") | (setSafe.Safety == "flavoring agent")
-                      | (setSafe.Safety == "fragrance") | (setSafe.Safety == "supplement")]
-    foundComp = foundComp[~foundComp.compound.isin(setSafe.compound)]
-    setUnfound = set()
-    setUnfound.update(unfound[~unfound.name.isin(found.compound)])
+    found_comp = unfound.merge(found, right_on="compound", left_on="name", how="inner")
+    set_safe = found_comp
+    set_safe = set_safe[(set_safe.Safety == "safe") | (set_safe.Safety == "flavoring agent")
+                        | (set_safe.Safety == "fragrance") | (set_safe.Safety == "supplement")]
+    found_comp = found_comp[~found_comp.compound.isin(set_safe.compound)]
+    set_unfound = set()
+    set_unfound.update(unfound[~unfound.name.isin(found.compound)])
 
     with open(f"./{compound}/{sign} SetFound.txt", "w+") as fSetFound:
-        for index, value in foundComp.iterrows():
+        for index, value in found_comp.iterrows():
             fSetFound.write(str(value["compound"]) + ",\t" + str(value["alias"]) + ",\t" + str(value["Safety"]) + "\n")
         fSetFound.write("\n========= SAFE =========\n\n")
-        for index, value in setSafe.iterrows():
+        for index, value in set_safe.iterrows():
             fSetFound.write(str(value["compound"]) + ",\t" + str(value["alias"]) + ",\t" + "\n")
 
     with open(f"./{compound}/{sign} SetUnfoundCopy.txt", "w+") as fSetUnfound:
-        for element in setUnfound:
-            fSetUnfound.write(element+"\n")
+        for element in set_unfound:
+            fSetUnfound.write(element + "\n")
 
     os.remove(f"./{compound}/{sign} SetUnfound.txt")
-

@@ -1,18 +1,23 @@
+#!/usr/bin/env python
 import pandas as pd
 from ToxicFilter import ToxFormat
 import os
+import logging
+
 
 # collate unfound files together
-def unfoundMerge():
-    mergeMain("UnfoundCopy", "Unfound")
+def unfound_merge():
+    merge_main("UnfoundCopy", "Unfound")
+
 
 # collate unchecked files together
-def uncheckedMerge():
+def unchecked_merge():
     print("---- UNCHECKED MERGE ----")
-    mergeMain("Unchecked", "Unchecked")
+    merge_main("Unchecked", "Unchecked")
+
 
 # collate toxic files together
-def toxicMerge():
+def toxic_merge():
     print("---- TOXIC MERGE ----")
     checked = pd.DataFrame(columns=['name', 'toxicity'])
 
@@ -25,30 +30,31 @@ def toxicMerge():
             chdir = True
             # read in toxic file
             unfound = pd.read_csv(f"./+ SetToxic.txt", delimiter="\t",
-                                engine='python', names=["name", "toxicity"])
+                                  engine='python', names=["name", "toxicity"])
             # merge unfound into checked
             checked = unfound.merge(checked, how="outer", on="name")
             # read in toxic file
             unfound = pd.read_csv(f"./+ SetToxic.txt", delimiter="\t",
-                                engine='python', names=["name", "toxicity"])
+                                  engine='python', names=["name", "toxicity"])
             # repeat
             checked = unfound.merge(checked, how="outer", on="name")
             os.chdir("..")
             chdir = False
         except Exception as e:
+            logging.exception(e)
             if chdir:
                 os.chdir("..")
-            chdir = False
 
     # write new collated object to file
-    
+
     with open(f"./totalTox.txt", "w+") as fTotalTox:
         for index, value in checked.iterrows():
-            fTotalTox.write(str(value["name"])+"\t"+str(value["toxicity"])+"\n")
+            fTotalTox.write(str(value["name"]) + "\t" + str(value["toxicity"]) + "\n")
     # format new collated file
     ToxFormat.toxfilter(".", "totalTox")
 
-def mergeMain(infile, outfile):
+
+def merge_main(infile, outfile):
     checked = pd.DataFrame(columns=['Compound'])
 
     for root, subDirs, files in os.walk("."):

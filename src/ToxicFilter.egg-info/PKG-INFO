@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: ToxicFilter
-Version: 0.0.3
+Version: 0.1.0
 Summary: A toxic filter used to analyse Mass Spectroscopy output on potentially toxic chemicals
 Home-page: https://github.com/swbreuer/ToxicFilter
 Author: Samuel Breuer
