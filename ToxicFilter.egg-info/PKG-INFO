@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: ToxicFilter
+Version: 0.2.0
+Summary: A toxic filter used to analyse Mass Spectroscopy output on potentially toxic chemicals
+Home-page: https://github.com/swbreuer/ToxicFilter
+Author: Samuel Breuer
+Author-email: swbreuer@mtu.edu
+License: UNKNOWN
+Project-URL: Bug Tracker, https://github.com/swbreuer/ToxicFilter/issues
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # ToxicFilter
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/?branch=main)
 [![Build Status](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/badges/build.png?b=main)](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/build-status/main)
@@ -25,5 +42,4 @@ Contents
     + `$ pip3 install shallow-backup`
     + `$ shallow-backup`
 
-### Usage
-Proper usage of this project includes using MZMine and MFAssignR, described in the paper to be published soon in MethodsX.
+

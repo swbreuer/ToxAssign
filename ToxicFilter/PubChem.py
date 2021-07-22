@@ -180,7 +180,7 @@ def main(compound, sign):
     print("\n")
     print(unknown)
     print("\n")
-    os.chdir("..")
+    os.chdir("../src")
 
 
 # debugging purposes
