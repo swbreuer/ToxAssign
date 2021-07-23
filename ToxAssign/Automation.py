@@ -16,7 +16,7 @@ __email__ = "swbreuer@mtu.edu"
 __status__ = "Development"
 
 
-def main(filepath):
+def automate(filepath):
     os.chdir(filepath)
     # run against all data files in folder
     for root, subDirs, files in os.walk("."):
@@ -45,5 +45,9 @@ def main(filepath):
     Format.toxfilter(".", "totalTox")
 
 
+def main():
+    automate(".")
+
+
 if __name__ == "__main__":
-    main(".")
+    automate(".")

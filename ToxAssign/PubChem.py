@@ -136,7 +136,7 @@ def main(compound, sign):
     unchecked = set()
     timeout = set()
     unfound = set()
-    esi = pd.read_csv(f'./{sign}ESI {compound}.csv', encoding='unicode_escape')
+    esi = pd.read_csv(f'./{sign} {compound}.csv', encoding='unicode_escape')
     tox = pd.read_csv('./OpenFoodTox.csv', encoding='unicode_escape')\
         .dropna(axis=0, subset=['MOLECULARFORMULA', 'COM_NAME']).drop_duplicates()
     tox_names.update(tox.COM_NAME[tox.MOLECULARFORMULA.isin(esi.formula)])

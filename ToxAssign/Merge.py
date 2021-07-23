@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import pandas as pd
-from ToxicFilter import Format
+from ToxAssign import Format
 import os
 import logging
 
