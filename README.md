@@ -1,8 +1,7 @@
 # ToxAssign
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/?branch=main)
-[![Build Status](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/badges/build.png?b=main)](https://scrutinizer-ci.com/g/swbreuer/ToxicFilter/build-status/main)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/swbreuer/ToxAssign/badges/quality-score.png?b=main)](https://scrutinizer-ci.com/g/swbreuer/ToxAssign/?branch=main)
+[![Build Status](https://scrutinizer-ci.com/g/swbreuer/ToxAssign/badges/build.png?b=main)](https://scrutinizer-ci.com/g/swbreuer/ToxAssign/build-status/main)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
 [![MOST logo](https://www.appropedia.org/w/images/thumb/c/c2/Sunhusky.png/240px-Sunhusky.png)](https://www.appropedia.org/Category:MOST)
 
 `ToxAssign` is designed to take the output of [MFAssignR](https://github.com/skschum/MFAssignR) and process the toxic compounds into an easily readable and understandable format.
@@ -21,10 +20,10 @@ Contents
  
  
  ### Installation
- The installation of this project is very simple. 
- 1. Install with [`pip3`](https://pypi.org/project/shallow-backup/)
-    + `$ pip3 install shallow-backup`
-    + `$ shallow-backup`
+ The installation of this project is very simple.
+ 
+ Install with [`pip3`](https://pypi.org/project/shallow-backup/)  
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`$ pip3 install ToxAssign`
 
 ### Usage
 &nbsp;&nbsp;&nbsp;To operate this tool, the user will need to place the csv files containing formulas they want to process in an empty folder along with the open food tox csv and the remove csv as in figure 29. The OpenFoodTox file contains the database of toxic compounds with their related formulas and the Remove file contains compounds that are not found on the PubChem database and thus are classified by hand.
