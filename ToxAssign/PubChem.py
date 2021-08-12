@@ -129,13 +129,13 @@ def processchems(compounds, unknown, unchecked, timeout, unfound, toxic, safe):
 
 
 def main(compound, sign):
-    tox_names = set()
     toxic = set()
     safe = set()
     unknown = set()
     unchecked = set()
     timeout = set()
     unfound = set()
+    tox_names = set()
     esi = pd.read_csv(f'./{sign} {compound}.csv', encoding='unicode_escape')
     tox = pd.read_csv('./OpenFoodTox.csv', encoding='unicode_escape')\
         .dropna(axis=0, subset=['MOLECULARFORMULA', 'COM_NAME']).drop_duplicates()

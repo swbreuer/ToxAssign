@@ -20,7 +20,7 @@ def toxfilter(compound, filename):
         toxfound = 5  # only mark highest toxicity
         try:
             data = json.loads(value["toxicity"])
-            for i in range(5):
+            for i in range(20):
                 if data[i]["String"][0:12] == "Acute Tox. 1":
                     set1.add(value["name"])
                     toxfound = 1

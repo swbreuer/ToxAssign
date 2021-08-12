@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-import PubChem
-import Format
-import UnfoundMatch
-import Merge
+from ToxAssign import PubChem
+from ToxAssign import Format
+from ToxAssign import Match
+from ToxAssign import Merge
 import os
 import logging
 
@@ -34,7 +34,7 @@ def automate(filepath):
                 print(f"{sign}{cmpd}")
                 PubChem.main(cmpd, sign)
                 Format.toxfilter(cmpd, f"{sign} SetToxic")
-                UnfoundMatch.match(cmpd, sign)
+                Match.match(cmpd, sign)
             except Exception as e:
                 logging.exception(e)
                 pass

@@ -57,21 +57,17 @@ def toxic_merge():
 def merge_main(infile, outfile):
     checked = pd.DataFrame(columns=['Compound'])
 
-    for subdir in os.scandir("."):
-
-        # merge files into one object
+    for subdir in os.scandir("."):      # merge files into one object
         try:
-            os.chdir(f"./{subdir}")
+            os.chdir(f"./{subdir.name}")     # move into data directory
             # read in toxic file
             unfound = pd.read_csv(f"./+ Set{infile}.txt", delimiter="\t", engine='python', names=["Compound"])
-            # merge unfound into checked
-            checked = unfound.merge(checked, how="outer")
-            # repeat
-            unfound = pd.read_csv(f"./- Set{infile}.txt", delimiter="\t", engine='python', names=["Compound"])
+            checked = unfound.merge(checked, how="outer")             # merge unfound into checked
+            unfound = pd.read_csv(f"./- Set{infile}.txt", delimiter="\t", engine='python', names=["Compound"])  # repeat
             checked = unfound.merge(checked, how="outer")
         finally:
             # move out of dir at end
-            os.chdir("../src")
+            os.chdir("..")
 
     # write object to file
     print(os.getcwd())
