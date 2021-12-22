@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 import pandas as pd
 import os
+import PubChem
 
 
 def match(compound, sign):
     print("---- UNFOUND MATCH ----")
-    unfound = pd.read_csv(f"./{compound}/{sign} SetUnfound.txt", delimiter="\t", engine='python', names=["name"])
+    unfound = pd.DataFrame(PubChem.unfound, delimiter="\t", engine='python', names=["name"])
     found = pd.read_csv("Remove.csv")
 
     unfound.name = unfound.name.astype(str)

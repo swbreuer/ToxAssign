@@ -2,12 +2,13 @@
 import pandas as pd
 import json
 import logging
+import PubChem
 
 
 def toxfilter(compound, filename):
     print("---- TOXIC FILTER ----")
 
-    toxic = pd.read_csv(f"./{compound}/{filename}.txt", delimiter="\t",
+    toxic = pd.DataFrame(PubChem.toxic, delimiter="\t",
                         engine='python', names=["name", "toxicity"])
 
     set1 = set()
