@@ -7,8 +7,8 @@ import time
 import os
 import logging
 
-class PubChem:
 
+class PubChemClass:
     toxic = set()
     safe = set()
     unknown = set()
@@ -40,13 +40,11 @@ class PubChem:
             print("food record not found")
             return True
 
-
     def toxicrecordcheck(record, toxic):
         print("toxic record check placeholder")
         toxic.add(record["Record"]["RecordTitle"] + " nan")
         # todo no scanning for toxic records
         return
-
 
     def safetyhazardcheck(record, toxic, index):
         print("safety hazard check |", end=" ")
@@ -64,7 +62,6 @@ class PubChem:
             print("hazard class not found |", end="")
             return False
 
-
     def request(cids, unknown, unchecked, timeout, toxic, safe):
         ids = cids["IdentifierList"]["CID"]
         for cid in ids:
@@ -72,7 +69,7 @@ class PubChem:
                 response = req.get(
                     "https://pubchem.ncbi.nlm.nih.gov/rest/pug_view/data/compound/{cid}/JSON/".format(
                         cid=cid))  # request full record about chemical
-                time.sleep(.2)  # wait to not overflow PubChem
+                time.sleep(.2)  # wait to not overflow PubChemClass
                 record = json.loads(response.text)
                 checked = False  # whether record has been checked to not double count
                 try:
@@ -80,9 +77,9 @@ class PubChem:
                         if checked:
                             continue
                         if record["Record"]["Section"][i]["TOCHeading"] == "Toxicity":
-                            PubChem.toxicrecordcheck(record, toxic)
+                            PubChemClass.toxicrecordcheck(record, toxic)
                         elif record["Record"]["Section"][i]["TOCHeading"] == "Safety and Hazards":
-                            checked = PubChem.safetyhazardcheck(record, toxic, i)
+                            checked = PubChemClass.safetyhazardcheck(record, toxic, i)
                 except Exception as e:
                     logging.exception(e)
                     pass
@@ -90,7 +87,7 @@ class PubChem:
                     if checked:
                         return
                     if record["Record"]["Section"][i]["TOCHeading"] == "Food Additives and Ingredients":
-                        checked = PubChem.foodrecordcheck(record, safe, i)
+                        checked = PubChemClass.foodrecordcheck(record, safe, i)
 
             except Timeout:
                 print()
@@ -108,20 +105,20 @@ class PubChem:
                 unknown.add(cid)
                 return
 
-
     def processchems(compounds, unknown, unchecked, timeout, unfound, toxic, safe):
         for value in compounds:
             try:
                 print("[" + str(value) + "]", end=" ")
                 response = req.get(
-                    "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{compound}/cids/JSON".format(compound=value))
+                    "https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{compound}/cids/JSON".format(
+                        compound=value))
                 time.sleep(.2)
                 cids = json.loads(response.text)
-                if response.status_code == 404:  # chemical not found in PubChem
+                if response.status_code == 404:  # chemical not found in PubChemClass
                     unfound.add(value)
                     print("404 not found")
                 else:
-                    PubChem.request(cids, unknown, unchecked, timeout, toxic, safe)
+                    PubChemClass.request(cids, unknown, unchecked, timeout, toxic, safe)
 
             except Timeout:
                 print()
@@ -135,20 +132,20 @@ class PubChem:
                 unknown.add(value[1])
                 return
 
-
-    def main(compound, sign):
+    def main(self, compound, sign):
         tox_names = set()
-        esi = pd.read_csv(f'./{sign} {compound}.csv', encoding='unicode_escape')
-        tox = pd.read_csv('./OpenFoodTox.csv', encoding='unicode_escape')\
+        esi = pd.read_csv(f'./{sign}ESI {compound}.csv', encoding='unicode_escape')
+        tox = pd.read_csv('./OpenFoodTox.csv', encoding='unicode_escape') \
             .dropna(axis=0, subset=['MOLECULARFORMULA', 'COM_NAME']).drop_duplicates()
         tox_names.update(tox.COM_NAME[tox.MOLECULARFORMULA.isin(esi.formula)])
         try:
-            PubChem.processchems(tox_names, PubChem.unknown, PubChem.unchecked, PubChem.timeout,
-                                 PubChem.unfound, PubChem.toxic, PubChem.safe)
+            PubChemClass.processchems(tox_names, PubChemClass.unknown, PubChemClass.unchecked, PubChemClass.timeout,
+                                      PubChemClass.unfound, PubChemClass.toxic, PubChemClass.safe)
         finally:
-            if not os.path.exists(f"./{compound}/"):    # create new directory for chem and move into it
-                os.makedirs(f"./{compound}/")
-            os.chdir(f"./{compound}/")
+            print("done")
+            # if not os.path.exists(f"./{compound}/"):  # create new directory for chem and move into it
+            #     os.makedirs(f"./{compound}/")
+            # os.chdir(f"./{compound}/")
             # write main out with unknown, timeout, and safe categories
             # with open(f"{sign} MainOut.txt", 'w+') as fOut:
             #     fOut.write("===================== Unknown =====================\n")
@@ -179,8 +176,8 @@ class PubChem:
             #         fToxic.write(str(element).replace("\'", "\""))
             #         fToxic.write("\n")
 
-        print(PubChem.timeout)
+        print(PubChemClass.timeout)
         print("\n")
-        print(PubChem.unknown)
+        print(PubChemClass.unknown)
         print("\n")
-        os.chdir("../src")
+        #os.chdir("../src")

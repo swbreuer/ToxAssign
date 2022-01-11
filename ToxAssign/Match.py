@@ -4,30 +4,39 @@ import os
 import PubChem
 
 
-def match(compound, sign):
-    print("---- UNFOUND MATCH ----")
-    unfound = pd.DataFrame(PubChem.unfound, delimiter="\t", engine='python', names=["name"])
-    found = pd.read_csv("Remove.csv")
-
-    unfound.name = unfound.name.astype(str)
-    found.compound = found.compound.astype(str)
-    found_comp = unfound.merge(found, right_on="compound", left_on="name", how="inner")
-    set_safe = found_comp
-    set_safe = set_safe[(set_safe.Safety == "safe") | (set_safe.Safety == "flavoring agent")
-                        | (set_safe.Safety == "fragrance") | (set_safe.Safety == "supplement")]
-    found_comp = found_comp[~found_comp.compound.isin(set_safe.compound)]
+class Match:
+    source = PubChem
     set_unfound = set()
-    set_unfound.update(unfound[~unfound.name.isin(found.compound)])
+    set_safe = set()
+    found_comp = set()
 
-    with open(f"./{compound}/{sign} SetFound.txt", "w+") as fSetFound:
-        for index, value in found_comp.iterrows():
-            fSetFound.write(str(value["compound"]) + ",\t" + str(value["alias"]) + ",\t" + str(value["Safety"]) + "\n")
-        fSetFound.write("\n========= SAFE =========\n\n")
-        for index, value in set_safe.iterrows():
-            fSetFound.write(str(value["compound"]) + ",\t" + str(value["alias"]) + ",\t" + "\n")
+    def __init__(self, pub=PubChem):
+        self.source = pub
 
-    with open(f"./{compound}/{sign} SetUnfoundCopy.txt", "w+") as fSetUnfound:
-        for element in set_unfound:
-            fSetUnfound.write(element + "\n")
+    def match(self):
+        print("---- UNFOUND MATCH ----")
+        self.unfound = pd.DataFrame(list(Match.source.PubChemClass.unfound), columns=["name"])
+        found = pd.read_csv("Remove.csv")
 
-    os.remove(f"./{compound}/{sign} SetUnfound.txt")
+        self.unfound.name = self.unfound.name.astype(str)
+        found.compound = found.compound.astype(str)
+        self.found_comp = self.unfound.merge(found, right_on="compound", left_on="name", how="inner")
+        self.set_safe = self.found_comp
+        self.set_safe = self.set_safe[(self.set_safe.Safety == "safe") | (self.set_safe.Safety == "flavoring agent")
+                                        | (self.set_safe.Safety == "fragrance") | (
+                                                    self.set_safe.Safety == "supplement")]
+        self.found_comp = self.found_comp[~self.found_comp.compound.isin(self.set_safe.compound)]
+        self.set_unfound.update(self.unfound[~self.unfound.name.isin(found.compound)])
+
+        # with open(f"./{compound}/{sign} SetFound.txt", "w+") as fSetFound:
+        #     for index, value in found_comp.iterrows():
+        #         fSetFound.write(str(value["compound"]) + ",\t" + str(value["alias"]) + ",\t" + str(value["Safety"]) + "\n")
+        #     fSetFound.write("\n========= SAFE =========\n\n")
+        #     for index, value in set_safe.iterrows():
+        #         fSetFound.write(str(value["compound"]) + ",\t" + str(value["alias"]) + ",\t" + "\n")
+        #
+        # with open(f"./{compound}/{sign} SetUnfoundCopy.txt", "w+") as fSetUnfound:
+        #     for element in set_unfound:
+        #         fSetUnfound.write(element + "\n")
+
+        # os.remove(f"./{compound}/{sign} SetUnfound.txt")

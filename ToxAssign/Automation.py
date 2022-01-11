@@ -1,10 +1,12 @@
 #!/usr/bin/env python
-from ToxAssign import PubChem
+from ToxAssign import PubChemClass
 from ToxAssign import Format
 from ToxAssign import Match
 from ToxAssign import Merge
+from ToxAssign import Writer
 import os
 import logging
+import PubChem
 
 __author__ = "Samuel Breuer"
 __copyright__ = "Copyright 2021, MOST"
@@ -17,10 +19,16 @@ __status__ = "Development"
 
 
 def automate(filepath):
+    pub = PubChemClass()
+    form = Format(pub)
+    mat = Match(pub)
     os.chdir(filepath)
     # run against all data files in folder
     for root, subDirs, files in os.walk("."):
         for file in files:
+            pub = PubChemClass()
+            format = Format()
+            match = Match()
             sign = file[0]
             cmpd = file.replace(f"{sign}ESI ", "").replace(".csv", "")
 
@@ -35,9 +43,10 @@ def automate(filepath):
 
             try:
                 print(f"{sign}{cmpd}")
-                PubChem.main(cmpd, sign)
-                Format.toxfilter(cmpd, f"{sign} SetToxic")
-                Match.match(cmpd, sign)
+                pub.main(cmpd, sign)
+                form.toxfilter()
+                mat.match()
+                Writer.write_chem(cmpd,sign, form, mat)
 
             except Exception as e:
                 logging.exception(e)
@@ -51,8 +60,8 @@ def automate(filepath):
 
 
 def main():
-    automate(".")
+    automate("/test")
 
 
 if __name__ == "__main__":
-    automate(".")
+    automate("../test")
